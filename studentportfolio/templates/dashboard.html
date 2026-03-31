@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Pixel River Financial Bank Services</title>
+</head>
+<body>
+  <h1>Pixel River Financial Bank Services</h1>
+  <h2>Dashboard</h2>
+  <p id="balance">Current Balance: loading...</p>
+
+  <h3>Deposit</h3>
+  <form id="depositForm">
+    <input name="amount" type="number" step="0.01" required>
+    <button type="submit">Deposit</button>
+  </form>
+
+  <h3>Withdraw</h3>
+  <form id="withdrawForm">
+    <input name="amount" type="number" step="0.01" required>
+    <button type="submit">Withdraw</button>
+  </form>
+
+  <button id="logoutBtn">Logout</button>
+
+  <script>
+    async function loadBalance() {
+      const res = await fetch("/api/dashboard", { credentials: "include" });
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById("balance").textContent = "Current Balance: " + Number(data.balance).toFixed(2);
+      } else {
+        window.location.href = "/login";
+      }
+    }
+
+    document.getElementById("depositForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const amt = new FormData(e.target).get("amount");
+      await fetch("/api/deposit", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        credentials: "include",
+        body: JSON.stringify({ amount: amt })
+      });
+      loadBalance();
+    });
+
+    document.getElementById("withdrawForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const amt = new FormData(e.target).get("amount");
+      await fetch("/api/withdraw", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        credentials: "include",
+        body: JSON.stringify({ amount: amt })
+      });
+      loadBalance();
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      await fetch("/api/logout", { credentials: "include" });
+      window.location.href = "/login";
+    });
+
+    loadBalance();
+  </script>
+</body>
+</html>
